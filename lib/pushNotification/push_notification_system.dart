@@ -1,9 +1,16 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class PushNotificationSystem
-{
+import '../global/global_var.dart';
+import '../models/trip_details.dart';
+import '../widgets/loading_dialog.dart';
+import '../widgets/notification_dialog.dart';
+
+class PushNotificationSystem {
   FirebaseMessaging firebaseCloudMessaging = FirebaseMessaging.instance;
 
   Future<String?> generateDeviceRegistrationToken() async
@@ -21,36 +28,91 @@ class PushNotificationSystem
     firebaseCloudMessaging.subscribeToTopic("users");
   }
 
-  startListeningForNewNotification() async
+  startListeningForNewNotification(BuildContext context) async
   {
     ///1. Terminated
     //When the app is completely closed and it receives a push notification
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? messageRemote)
-    {
-      if(messageRemote != null)
-      {
+    FirebaseMessaging.instance.getInitialMessage().then((
+        RemoteMessage? messageRemote) {
+      if (messageRemote != null) {
         String tripID = messageRemote.data["tripID"];
+
+        retrieveTripRequestInfo(tripID, context);
       }
     });
 
     ///2. Foreground
     //When the app is open and it receives a push notification
-    FirebaseMessaging.onMessage.listen((RemoteMessage? messageRemote)
-    {
-      if(messageRemote != null)
-      {
+    FirebaseMessaging.onMessage.listen((RemoteMessage? messageRemote) {
+      if (messageRemote != null) {
         String tripID = messageRemote.data["tripID"];
+
+        retrieveTripRequestInfo(tripID, context);
       }
     });
 
     ///3. Background
     //When the app is in the background and it receives a push notification
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? messageRemote)
-    {
-      if(messageRemote != null)
-      {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? messageRemote) {
+      if (messageRemote != null) {
         String tripID = messageRemote.data["tripID"];
+
+        retrieveTripRequestInfo(tripID, context);
       }
+    });
+  }
+
+  retrieveTripRequestInfo(String tripID, BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) =>
+          LoadingDialog(messageText: "Getting details..."),
+    );
+
+    DatabaseReference tripRequestsRef = FirebaseDatabase.instance.ref().child(
+        "tripRequests").child(tripID);
+
+    tripRequestsRef.once().then((dataSnapshot) {
+      Navigator.pop(context);
+
+      audioPlayer.open(
+        Audio(
+            "assets/audio/alert_sound.mp3"
+        ),
+      );
+
+      audioPlayer.play();
+
+      TripDetails tripDetailsInfo = TripDetails();
+      double pickUpLat = double.parse(
+          (dataSnapshot.snapshot.value! as Map)["pickUpLatLng"]["latitude"]);
+      double pickUpLng = double.parse(
+          (dataSnapshot.snapshot.value! as Map)["pickUpLatLng"]["longitude"]);
+      tripDetailsInfo.pickUpLatLng = LatLng(pickUpLat, pickUpLng);
+
+      tripDetailsInfo.pickupAddress =
+      (dataSnapshot.snapshot.value! as Map)["pickUpAddress"];
+
+      double dropOffLat = double.parse(
+          (dataSnapshot.snapshot.value! as Map)["dropOffLatLng"]["latitude"]);
+      double dropOffLng = double.parse(
+          (dataSnapshot.snapshot.value! as Map)["dropOffLatLng"]["longitude"]);
+      tripDetailsInfo.dropOffLatLng = LatLng(dropOffLat, dropOffLng);
+
+      tripDetailsInfo.dropOffAddress =
+      (dataSnapshot.snapshot.value! as Map)["dropOffAddress"];
+
+      tripDetailsInfo.userName =
+      (dataSnapshot.snapshot.value! as Map)["userName"];
+      tripDetailsInfo.userPhone =
+      (dataSnapshot.snapshot.value! as Map)["userPhone"];
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) =>
+            NotificationDialog(tripDetailsInfo: tripDetailsInfo,),
+      );
     });
   }
 }
