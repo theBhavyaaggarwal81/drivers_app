@@ -17,3 +17,5 @@ StreamSubscription<Position>? positionStreamHomePage;
 
 int driverTripRequestTimeout = 20;
 final audioPlayer = AssetsAudioPlayer();
+
+Position? driverCurrentPosition;
