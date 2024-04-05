@@ -47,6 +47,8 @@ dependencies:
   flutter_geofire:
   firebase_messaging:
   assets_audio_player:
+  http:
+  flutter_polyline_points:
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +75,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - themes/
     - assets/audio/
 
   # An image asset can refer to one or more resolution-specific "variants", see
