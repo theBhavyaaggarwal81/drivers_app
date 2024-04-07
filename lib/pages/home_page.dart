@@ -96,20 +96,20 @@ class _HomePageState extends State<HomePage> {
 
   retrieveCurrentDriverInfo() async
   {
-    // await FirebaseDatabase.instance.ref()
-    //     .child("drivers")
-    //     .child(FirebaseAuth.instance.currentUser!.uid)
-    //     .once().then((snap)
-    // {
-    //   driverName = (snap.snapshot.value as Map)["name"];
-    //   driverPhone = (snap.snapshot.value as Map)["phone"];
-    //   driverPhoto = (snap.snapshot.value as Map)["photo"];
-    //   carColor = (snap.snapshot.value as Map)["car_details"]["carColor"];
-    //   carModel = (snap.snapshot.value as Map)["car_details"]["carModel"];
-    //   carNumber = (snap.snapshot.value as Map)["car_details"]["carNumber"];
-    // });
+    await FirebaseDatabase.instance.ref()
+        .child("drivers")
+        .child(FirebaseAuth.instance.currentUser!.uid)
+        .once().then((snap)
+    {
+      driverName = (snap.snapshot.value as Map)["name"];
+      driverPhone = (snap.snapshot.value as Map)["phone"];
+      driverPhoto = (snap.snapshot.value as Map)["photo"];
+      carColor = (snap.snapshot.value as Map)["car_details"]["carColor"]; //Check spelling!
+      carModel = (snap.snapshot.value as Map)["car_details"]["carModel"];
+      carNumber = (snap.snapshot.value as Map)["car_details"]["carNumber"];
+    });
 
-    initializePushNotificationSystem();
+    // initializePushNotificationSystem();
   }
 
   @override
@@ -117,6 +117,7 @@ class _HomePageState extends State<HomePage> {
     // TODO: implement initState
     super.initState();
 
+    initializePushNotificationSystem();
     retrieveCurrentDriverInfo();
   }
 
