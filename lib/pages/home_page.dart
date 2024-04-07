@@ -109,7 +109,7 @@ class _HomePageState extends State<HomePage> {
       carNumber = (snap.snapshot.value as Map)["car_details"]["carNumber"];
     });
 
-    // initializePushNotificationSystem();
+    initializePushNotificationSystem();
   }
 
   @override
@@ -117,7 +117,6 @@ class _HomePageState extends State<HomePage> {
     // TODO: implement initState
     super.initState();
 
-    initializePushNotificationSystem();
     retrieveCurrentDriverInfo();
   }
 
